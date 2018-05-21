@@ -3,8 +3,6 @@
 
 #define INPUT_BUFFER_LENGTH 512 /* allow the user 512 characters of command */
 #define MAX_PROCESSES 8 /* allow 8 background processes */
-#define STDIN_FD 0 /* cool names for the streams */
-#define STDOUT_FD 1
 #define PATH_LENGTH (FILENAME_MAX > 4096 ? 4096 : FILENAME_MAX)
 
 /* some convenient typesafe memory allocations */

@@ -296,9 +296,18 @@ void launchProgramWithPipe(command_t* command)
         if(process2 == 0)
         {
             /* the first process needs readjusting on the stdout stream */
-            close(pipefds[0]);
-            dup2(pipefds[1], STDOUT_FD); /* set up the pipe */
-            close(pipefds[1]);
+            if((close(pipefds[0]) < 0)
+                || (dup2(pipefds[1], STDOUT_FILENO) < 0)
+                || (close(pipefds[1]) < 0))
+            {
+                fprintf(stderr, "%s\n", strerror(errno));
+                fflush(stderr);
+
+                /* free the process information blocks */
+                freeCommand(command);
+
+                exit(EXIT_FAILURE);
+            }
 
             /* ready for launch! */
             execvp(command->programs[0].args[0], command->programs[0].args);
@@ -306,9 +315,18 @@ void launchProgramWithPipe(command_t* command)
         else if(process2 > 0)
         {
             /* the second process needs readjusting on the stdin stream */
-            close(pipefds[1]);
-            dup2(pipefds[0], STDIN_FD); /* set up the pipe */
-            close(pipefds[0]);
+            if((close(pipefds[1]) < 0)
+                || (dup2(pipefds[0], STDIN_FILENO) < 0)
+                || (close(pipefds[0]) < 0))
+            {
+                fprintf(stderr, "%s\n", strerror(errno));
+                fflush(stderr);
+
+                /* free the process information blocks */
+                freeCommand(command);
+
+                exit(EXIT_FAILURE);   
+            }
 
             /* ready for launch! */
             execvp(command->programs[1].args[0], command->programs[1].args);
